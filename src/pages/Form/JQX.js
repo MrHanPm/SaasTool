@@ -1,7 +1,4 @@
 import React from 'react'
-import {Icon} from 'react-weui'
-import {Tool,Alert} from '../../tool.js'
-import './sidebar.less'
 
 class Sidebar extends React.Component{
   constructor(props) {
@@ -35,48 +32,35 @@ class Sidebar extends React.Component{
   }
 
   upDatas(e){
-    let citylistData = []
-    for(let i=0;i < citylist.citylist.length; i++){
-      if(citylist.citylist[i].provincesn == e.target.title){
-          citylistData.push(citylist.citylist[i]);
-      }
-    }
+    let { BS } = this.state
     this.setState({
-      provincesn:e.target.title,
-      provincename:e.target.innerHTML,
-      citysn:'',
-      cityname:'',
-      R:citylistData,
-      active: true,
+      Lval:e.target.title,
+      Lname:e.target.innerHTML,
+      Rval:'',
+      Rname:'',
+      R: BS[e.target.title],
+      active: true
     })
-    citylistData = []
   }
   goDatas(e){
-    let Ad = {
-      'provincesn':this.state.provincesn,
-      'provincename':this.state.provincename,
-      'citysn':e.target.title,
-      'cityname':e.target.innerHTML
+    let AD = {
+      Lval: parseFloat(this.state.Lval),
+      Lname: this.state.Lname,
+      Rval: parseFloat(e.target.title),
+      Rname: e.target.innerHTML
     }
-    // this.setState({
-    //   visible:false,
-    //   cityname:e.target.innerHTML,
-    //   citysn:e.target.title
-    // })
     this.setState({
-      cityname:e.target.innerHTML,
-      citysn:e.target.title,
+      Rval: e.target.title,
+      Rname: e.target.innerHTML,
       visible:false
-    }, ()=> this.props.onChange(Ad))
+    },() => this.props.onChange(AD))
   }
   componentDidMount(){
     let self = this
-    document.querySelectorAll('.PubSidebar').addEventListener('touchend', (e) => {
-        var x = e.changedTouches[0].pageX
-        if( x < 68 ){
-            self.closeSold()
-        }
-      }, false)
+    this.refs.PubSidebar.addEventListener('touchend', (e) => {
+      let x = e.changedTouches[0].pageX
+      if( x < 68 ) {self.closeSold()}
+    }, false)
   }
   componentWillReceiveProps(nextProps) {
     if(typeof(nextProps.Datas) == 'number'){
@@ -91,41 +75,31 @@ class Sidebar extends React.Component{
     })
   }
   render(){
+    let selfs = this
     let {L, R, Lname, Rname, visible, active} = this.state
       return(
-          <aside className={visible ? "PubSidebar visible":"PubSidebar"}>
+          <aside className={visible ? "PubSidebar visible":"PubSidebar"} ref="PubSidebar">
               <header>
-                  <span>类别</span>
+                  <span>交强险类别</span>
                   <span className="closeBtn" onClick={this.closeSold}></span>
               </header>
               <ul className="Fnav">
-                {L.map((e,indexs) => 
-                  <li key={indexs} 
-                  className={e.provincename == Fes ? "active" :''}
-                  >
-                    <span 
-                    title={e.provincesn}
-                    onClick={self.upDatas}
-                    >
-                      {e.provincename}
+                {L.map((e,indexs) =>
+                  <li key={indexs} className={e.name == Lname ? "active" :''}>
+                    <span title={e.val} onClick={selfs.upDatas}>
+                      {e.name}
                     </span>
-                    <Icon value="success" />
+                    <i></i>
                   </li>
                 )}
               </ul>
               <ul className="Lnav" style={{'display': active?'block':'none'}}>
                 {R.map((el,index) => 
-                  <li key={index} 
-                  className={el.cityname == Ges ? "active" :''} 
-                  >
-                    <span 
-                    key={index} 
-                    title={el.citysn}
-                    onClick={self.goDatas}
-                    >
-                      {el.cityname}
+                  <li key={index} className={el.name == Rname ? "active" :''}>
+                    <span key={index} title={el.val} onClick={selfs.goDatas}>
+                      {el.name}
                     </span>
-                    <Icon value="success" />
+                    <i></i>
                   </li>
                 )}
               </ul>

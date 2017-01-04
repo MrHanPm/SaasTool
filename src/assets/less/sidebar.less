@@ -36,9 +36,8 @@
     top: 0;
     left: 0;
     width:44px;
-    font-family:'weui';
     &:before{
-        content: "\EA06";
+        content: "《";
         width:44px;
         height: 44px;
         color: #666;
@@ -85,7 +84,18 @@
             display:inline-block;
             position: absolute;
             right: 30%;
-            top: 8px;
+            top: 12px;
+            &:before{
+                content: "\EA06";
+                font-family:'weui';
+                width:22px;
+                height: 22px;
+                color: #09bb07;
+                display: block;
+                text-align: center;
+                line-height: 22px;
+                font-size: 22px;
+            }
         }
     }
 }

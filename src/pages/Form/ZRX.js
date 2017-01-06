@@ -19,6 +19,7 @@ class Sidebar extends React.Component{
           }
       this.closeSold = this.closeSold.bind(this)
       this.goDatas = this.goDatas.bind(this)
+      this.CLXB = this.CLXB.bind(this)
   }
 
   goDatas(e){
@@ -32,12 +33,13 @@ class Sidebar extends React.Component{
       visible:false
     },() => this.props.onChange(AD))
   }
-  componentDidMount(){
-    let self = this
-    this.refs.PubSidebar.addEventListener('touchend', (e) => {
-      let x = e.changedTouches[0].pageX
-      if( x < 68 ) {self.closeSold()}
-    }, false)
+  componentDidMount(){}
+
+  CLXB (e) {
+    let x = e.pageX
+    if( x < 68 ){
+      this.closeSold()
+    }
   }
   componentWillReceiveProps(nextProps) {
     if(typeof(nextProps.Datas) == 'number'){
@@ -49,15 +51,15 @@ class Sidebar extends React.Component{
   closeSold(){
     this.setState({
       visible:false
-    })
+    },() => this.props.onClose())
   }
   render(){
     let selfs = this
     let {L, Lname, visible} = this.state
       return(
-          <aside className={visible ? "PubSidebar visible":"PubSidebar"} ref="PubSidebar">
+          <aside className={visible ? "PubSidebar visible":"PubSidebar"} onClick={this.CLXB}>
               <header>
-                  <span>保险折扣</span>
+                  <span>赔偿金额</span>
                   <span className="closeBtn" onClick={this.closeSold}></span>
               </header>
               <ul className="Fnav">

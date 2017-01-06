@@ -25,7 +25,6 @@
  */
 export default function handleChange(evt) {
   this.setState({
-    [evt.target.name]: parseFloat(evt.target.value.trim()==''? 0 : evt.target.value.trim()),
-    JQXrandom:'',JQZKrandom:'',SYXZKrandom:'',DSFXrandom:'',BLPSrandom:''
+    [evt.target.name]: parseFloat(evt.target.value.trim() == '' ? 0 : evt.target.value.trim())
   })
 }

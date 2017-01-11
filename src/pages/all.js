@@ -64,7 +64,7 @@ export default class TruckMsg extends Component {
         DUTYVAL: '', // 第三方责任险
         BLPSX: 0,  // 玻璃破碎险
         SFBLVAL: 30, // 首付比例
-        DKNLV: 5.25, // 贷款年利率
+        DKNLV: 6.65, // 贷款年利率
         YEARS: 3, // 贷款年
 
         DKZJVAL: 0, // 贷款总价
@@ -164,12 +164,19 @@ export default class TruckMsg extends Component {
     if(e.target.checked){
       if(e.target.value == '1'){
         this.setState({
-          DKNLV: 4.85,
+          DKNLV: 6.56,
           YEARS: parseInt(e.target.value)
         })
-      } else {
+      }
+      if(e.target.value == '2' || e.target.value == '3'){
         this.setState({
-          DKNLV: 5.25,
+          DKNLV: 6.65,
+          YEARS: parseInt(e.target.value)
+        })
+      }
+      if(e.target.value == '4' || e.target.value == '5'){
+        this.setState({
+          DKNLV: 6.9,
           YEARS: parseInt(e.target.value)
         })
       }
@@ -263,10 +270,10 @@ export default class TruckMsg extends Component {
     // 计算车辆损失险 基础保费+裸车价格*费率
     let {JQXVAL, LPAY, ClssF, ClssT} = this.state
     if(JQXVAL.Lname == '营业'){
-      return Math.round((ClssT[JQXVAL.Rname][0] + LPAY) * ClssT[JQXVAL.Rname][1])
+      return Math.round(LPAY * ClssT[JQXVAL.Rname][1] + ClssT[JQXVAL.Rname][0] )
     }
     if(JQXVAL.Lname == '非营业'){
-      return Math.round((ClssF[JQXVAL.Rname][0] + LPAY) * ClssF[JQXVAL.Rname][1])
+      return Math.round(LPAY * ClssF[JQXVAL.Rname][1] + ClssF[JQXVAL.Rname][0] )
     }
   }
   Reckon () {
@@ -298,7 +305,7 @@ export default class TruckMsg extends Component {
 
 
       SFPAY = LPAY * SFBLVAL/100
-      YFV = YEARS*12
+      YFV = YEARS * 12
 
       if(JQXVAL.Lname == '营业'){
         DUTYVAL = this.state.DutyT[JQXVAL.Rname]
@@ -311,8 +318,8 @@ export default class TruckMsg extends Component {
       BYCOUNT = Math.round((GZS + JQXVAL.Rval + CarShip + UpSign) * JQZKVAL.Lval )
       BLPSX = this.BlpsAC()
       CLSSX = this.ClssxAC()
-      QCQD = Math.round((LPAY + 130) * 0.005)
-      ZRSS = Math.round(LPAY * 0.015)
+      QCQD = Math.round(LPAY * 0.005 + 130)
+      ZRSS = Math.round(LPAY * 0.0015)
       NOTY = Math.round((DUTYVAL[DSFXVAL.Lval] + CLSSX) * 0.2)
       WGZR = Math.round(DUTYVAL[DSFXVAL.Lval] * 0.2)
 
@@ -345,9 +352,12 @@ export default class TruckMsg extends Component {
       CARCOM = Math.round(BYCOUNT + SYCOUNT + LPAY)
 
       DKSFVAL = Math.round( SFPAY + BCOM )
-      DKYGVAL = Math.round((LPAY - SFPAY)/YFV)
-      DKLXVAL = Math.round((LPAY - SFPAY)*DKNLV/100)
-      DKZJVAL = Math.round( DKSFVAL + (DKYGVAL * YFV))
+      // 月还款额=本金*月利率*(1+月利率)^n/[(1+月利率)^n-1] 
+      DKYGVAL = Math.round((LPAY - SFPAY) * (DKNLV/100/12) * Math.pow((DKNLV/100/12 + 1),YFV)/ (Math.pow((DKNLV/100/12 + 1),YFV) - 1))
+      
+      DKZJVAL = Math.round( DKYGVAL * YFV + DKSFVAL )
+
+      DKLXVAL = Math.round(DKYGVAL * YFV - (LPAY - SFPAY))
       this.setState({
         BYCOUNT: BYCOUNT, // 必要花费总和
         GZS: GZS, // 购置税
@@ -367,6 +377,8 @@ export default class TruckMsg extends Component {
         DKYGVAL: DKYGVAL, // 月供
         
       })
+
+      // console.log(DKNLV/100/12,'月', DKYGVAL,'月供',DKLXVAL,'利息',DKZJVAL,'贷款总价')
     }
   }
 

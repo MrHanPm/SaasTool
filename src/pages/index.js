@@ -187,10 +187,10 @@ export default class TruckMsg extends Component {
     // 计算车辆损失险 基础保费+裸车价格*费率
     let {JQXVAL, LPAY, ClssF, ClssT} = this.state
     if(JQXVAL.Lname == '营业'){
-      return Math.round((ClssT[JQXVAL.Rname][0] + LPAY) * ClssT[JQXVAL.Rname][1])
+      return Math.round(LPAY * ClssT[JQXVAL.Rname][1] + ClssT[JQXVAL.Rname][0] )
     }
     if(JQXVAL.Lname == '非营业'){
-      return Math.round((ClssF[JQXVAL.Rname][0] + LPAY) * ClssF[JQXVAL.Rname][1])
+      return Math.round(LPAY * ClssF[JQXVAL.Rname][1] + ClssF[JQXVAL.Rname][0] )
     }
   }
   Reckon () {
@@ -224,8 +224,8 @@ export default class TruckMsg extends Component {
       BYCOUNT = Math.round((GZS + JQXVAL.Rval + CarShip + UpSign) * JQZKVAL.Lval )
       BLPSX = this.BlpsAC()
       CLSSX = this.ClssxAC()
-      QCQD = Math.round((LPAY + 130) * 0.005)
-      ZRSS = Math.round(LPAY * 0.015)
+      QCQD = Math.round(LPAY * 0.005 + 130)
+      ZRSS = Math.round(LPAY * 0.0015)
       NOTY = Math.round((DUTYVAL[DSFXVAL.Lval] + CLSSX) * 0.2)
       WGZR = Math.round(DUTYVAL[DSFXVAL.Lval] * 0.2)
 

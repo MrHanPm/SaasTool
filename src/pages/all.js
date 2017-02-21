@@ -98,7 +98,13 @@ export default class TruckMsg extends Component {
           '5-10吨':[1321,0.0236],
           '10吨以上':[2097,0.0252]
         },
-
+        CarShipData:{
+          '2吨以下': 120,
+          '2-5吨': 300,
+          '5-10吨': 600,
+          '10吨以上': 600
+        },
+        isBtn: true
     }
     this.handleChange = handleChange.bind(this)
     this.ACJQX = this.ACJQX.bind(this)
@@ -118,9 +124,13 @@ export default class TruckMsg extends Component {
       // if(INDEXS.LPAY === 0 || INDEXS.LPAY > 0){
       //   this.state = INDEXS
       // }
+      // console.log(window.screen.height)
   }
   componentDidMount() {
-
+    window.addEventListener("resize",() => {
+      let { isBtn } = this.state
+        this.setState({isBtn: !isBtn})
+    })
   }
   ACJQX(){ this.setState({JQXrandom: Math.random() }) }
   ACJQZK(){ this.setState({JQZKrandom: Math.random() }) }
@@ -130,6 +140,7 @@ export default class TruckMsg extends Component {
 
   componentWillUnmount () {
     // Tool.localItem('ALLEXACC', JSON.stringify(this.state))
+    window.removeEventListener("resize",null)
   }
   SFBLAC (e) {
     // 首付比例自定义输入
@@ -158,7 +169,7 @@ export default class TruckMsg extends Component {
       SFBLVAL: vals
     })
   }
-  
+
   DKNLVAL (e) {
     // 贷款期限
     if(e.target.checked){
@@ -197,7 +208,7 @@ export default class TruckMsg extends Component {
         // WGZR  // 无故责任险
         let SFPAY = LPAY * SFBLVAL/100  // 裸价首付
         YFV = YEARS*12
-
+    LPAY = parseFloat(LPAY)
     if(e.target.checked) {
       if(e.target.id == 's1'){
         this.refs.NOTY.disabled = false
@@ -207,14 +218,14 @@ export default class TruckMsg extends Component {
     } else {
       if(e.target.id == 's1'){
         COUM = Math.round(SYCOUNT - parseInt(e.target.value))
-        this.refs.NOTY.checked = false
-        this.refs.NOTY.disabled = true
-        this.refs.WGZR.checked = false
-        this.refs.WGZR.disabled = true
         if(this.refs.NOTY.checked){
+          this.refs.NOTY.checked = false
+          this.refs.NOTY.disabled = true
           COUM = Math.round(COUM - NOTY)
         }
         if(this.refs.WGZR.checked){
+          this.refs.WGZR.checked = false
+          this.refs.WGZR.disabled = true
           COUM = Math.round(COUM - WGZR)
         }
       } else {
@@ -256,15 +267,20 @@ export default class TruckMsg extends Component {
         Alert.to("请输入裸车价格")
         return false
     }
-    if(this.state.SFBLVAL === 0){
-        Alert.to("请选择首付比例")
-        return false
-    }
+    // if(this.state.SFBLVAL === 0){
+    //     Alert.to("请选择首付比例")
+    //     return false
+    // }
     if(this.state.DKNLV === 0){
         Alert.to("请输入贷款年利率")
         return false
     }
     return true
+  }
+  changeLv (val) {
+    this.setState({
+      CarShip: this.state.CarShipData[val.Rname]
+    })
   }
   ClssxAC () {
     // 计算车辆损失险 基础保费+裸车价格*费率
@@ -303,6 +319,12 @@ export default class TruckMsg extends Component {
               SFPAY,  // 裸价首付
               YFV // 月份
 
+      LPAY = parseFloat(LPAY)
+      SFBLVAL = parseFloat(SFBLVAL)
+      DKNLV = parseFloat(DKNLV)
+      CarShip = parseFloat(CarShip) // 车船使用税
+      UpSign = parseFloat(UpSign) // 上牌费用
+      PEOPAY = parseFloat(PEOPAY) // 车上人员险
 
       SFPAY = LPAY * SFBLVAL/100
       YFV = YEARS * 12
@@ -347,7 +369,7 @@ export default class TruckMsg extends Component {
       if(this.refs.PEOPAY.checked){
         SYCOUNT = Math.round(SYCOUNT + PEOPAY)
       }
-      SYCOUNT =  SYCOUNT * SYXZKVAL.Lval
+      SYCOUNT =  parseFloat(SYCOUNT * SYXZKVAL.Lval)
       BCOM = Math.round(BYCOUNT + SYCOUNT)
       CARCOM = Math.round(BYCOUNT + SYCOUNT + LPAY)
 
@@ -383,7 +405,7 @@ export default class TruckMsg extends Component {
   }
 
   render () {
-    let {PEOPAY,UpSign,CarShip, JQXVAL, LPAY, JQZKVAL, SYXZKVAL, DSFXVAL, BLPSVAL,
+    let {PEOPAY,UpSign,CarShip, JQXVAL, LPAY, JQZKVAL, SYXZKVAL, DSFXVAL, BLPSVAL, isBtn,
             BYCOUNT, // 必要花费总和
             GZS, // 购置税
             CLSSX, // 车辆损失险
@@ -406,7 +428,7 @@ export default class TruckMsg extends Component {
     } = this.state
 
     let DXFZRXS = DUTYVAL[DSFXVAL.Lval] || 0
-    let SFBLVALINPUT = SFBLVAL == '30' || SFBLVAL == '40' || SFBLVAL == '50' || SFBLVAL == '60' || SFBLVAL == '0' ? '' : SFBLVAL
+    let SFBLVALINPUT = SFBLVAL == '30' || SFBLVAL == '40' || SFBLVAL == '50' || SFBLVAL == '60' || SFBLVAL
     let YGMOS = parseInt(YEARS) * 12
     return (
     <div style={{height: '100%'}}>
@@ -650,7 +672,7 @@ export default class TruckMsg extends Component {
       <div style={{height: '20px'}}> </div>
     </div>
 
-      <div className="footBox">
+      <div className="footBox" style={{display: isBtn ? '' : 'none'}}>
         <div className="footBtn" onClick={this.Reckon}>计算</div>
         <div className="footCon">
           <div className="footNub"><em>总价</em><i>{DKZJVAL}元</i></div>
@@ -671,7 +693,7 @@ export default class TruckMsg extends Component {
         </div>
       </div>
       <JQX Datas={this.state.JQXrandom}
-           onChange={(val) => this.setState({JQXVAL: val,JQXrandom:''})}
+           onChange={(val) => this.setState({JQXVAL: val,JQXrandom:''},this.changeLv(val))}
            onClose={() => this.setState({JQXrandom:''})} />
       <ZKX Datas={this.state.JQZKrandom}
            onChange={(val) => this.setState({JQZKVAL: val,JQZKrandom:''})}

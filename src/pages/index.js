@@ -91,6 +91,13 @@ export default class TruckMsg extends Component {
           '5-10吨':[1321,0.0236],
           '10吨以上':[2097,0.0252]
         },
+        CarShipData:{
+          '2吨以下': 120,
+          '2-5吨': 300,
+          '5-10吨': 600,
+          '10吨以上': 600
+        },
+        isBtn: true
 
     }
     this.handleChange = handleChange.bind(this)
@@ -110,7 +117,10 @@ export default class TruckMsg extends Component {
       // }
   }
   componentDidMount() {
-
+    window.addEventListener("resize",() => {
+      let { isBtn } = this.state
+        this.setState({isBtn: !isBtn})
+    })
   }
   ACJQX(){ this.setState({JQXrandom: Math.random() }) }
   ACJQZK(){ this.setState({JQZKrandom: Math.random() }) }
@@ -121,11 +131,13 @@ export default class TruckMsg extends Component {
   // componentWillReceiveProps(nextProps) {}
   componentWillUnmount () {
     // Tool.localItem('INDEXACC', JSON.stringify(this.state))
+    window.removeEventListener("resize",null)
   }
 
   CheckBox (e) {
     let { SYCOUNT, NOTY, WGZR, BYCOUNT, LPAY } = this.state
     let COUM = 0,BCOM = 0,CARCOM = 0
+    LPAY = parseFloat(LPAY)
         // NOTY  // 不计免赔险
         // WGZR  // 无故责任险
     if(e.target.checked) {
@@ -137,16 +149,14 @@ export default class TruckMsg extends Component {
     } else {
       if(e.target.id == 's1'){
         COUM = Math.round(SYCOUNT - parseInt(e.target.value))
-
-        this.refs.NOTY.checked = false
-        this.refs.NOTY.disabled = true
-        this.refs.WGZR.checked = false
-        this.refs.WGZR.disabled = true
-
         if(this.refs.NOTY.checked){
+          this.refs.NOTY.checked = false
+          this.refs.NOTY.disabled = true
           COUM = Math.round(COUM - NOTY)
         }
         if(this.refs.WGZR.checked){
+          this.refs.WGZR.checked = false
+          this.refs.WGZR.disabled = true
           COUM = Math.round(COUM - WGZR)
         }
       } else {
@@ -161,7 +171,11 @@ export default class TruckMsg extends Component {
       CARCOM: CARCOM
     })
   }
-
+  changeLv (val) {
+    this.setState({
+      CarShip: this.state.CarShipData[val.Rname]
+    })
+  }
   BlpsAC () {
     // 计算玻璃单独破碎险  裸车价格*费率
     let {BLPSVAL, JQXVAL, LPAY} = this.state
@@ -213,6 +227,11 @@ export default class TruckMsg extends Component {
               DUTYVAL = [], // 第三方责任险
               BLPSX  // 玻璃破碎险
 
+      LPAY = parseFloat(LPAY)
+      CarShip = parseFloat(CarShip) // 车船使用税
+      UpSign = parseFloat(UpSign) // 上牌费用
+      PEOPAY = parseFloat(PEOPAY) // 车上人员险
+
       if(JQXVAL.Lname == '营业'){
         DUTYVAL = this.state.DutyT[JQXVAL.Rname]
       }
@@ -253,7 +272,7 @@ export default class TruckMsg extends Component {
       if(this.refs.PEOPAY.checked){
         SYCOUNT = Math.round(SYCOUNT + PEOPAY)
       }
-      SYCOUNT =  SYCOUNT * SYXZKVAL.Lval
+      SYCOUNT =  parseFloat(SYCOUNT * SYXZKVAL.Lval)
       BCOM = Math.round(BYCOUNT + SYCOUNT)
       CARCOM = Math.round(BYCOUNT + SYCOUNT + LPAY)
 
@@ -304,7 +323,7 @@ export default class TruckMsg extends Component {
     // BCOM = parseInt(BYCOUNT + SYCOUNT)
     // CARCOM = parseInt(BYCOUNT + SYCOUNT + LPAY)
   render () {
-    let {PEOPAY,UpSign,CarShip, JQXVAL, LPAY, JQZKVAL, SYXZKVAL, DSFXVAL, BLPSVAL,
+    let {PEOPAY,UpSign,CarShip, JQXVAL, LPAY, JQZKVAL, SYXZKVAL, DSFXVAL, BLPSVAL,isBtn,
             BYCOUNT, // 必要花费总和
             GZS, // 购置税
             CLSSX, // 车辆损失险
@@ -492,7 +511,7 @@ export default class TruckMsg extends Component {
       <div style={{height: '20px'}}> </div>
     </div>
 
-      <div className="footBox">
+      <div className="footBox" style={{display: isBtn ? '' : 'none'}}>
         <div className="footBtn" onClick={this.Reckon}>计算</div>
         <div className="footCon">
           <div className="footNub"><em>购车总金额</em><i>{CARCOM}元</i></div>
@@ -509,7 +528,7 @@ export default class TruckMsg extends Component {
         </div>
       </div>
       <JQX Datas={this.state.JQXrandom}
-           onChange={(val) => this.setState({JQXVAL: val,JQXrandom:''})}
+           onChange={(val) => this.setState({JQXVAL: val,JQXrandom:''},this.changeLv(val))}
            onClose={() => this.setState({JQXrandom:''})} />
       <ZKX Datas={this.state.JQZKrandom}
            onChange={(val) => this.setState({JQZKVAL: val,JQZKrandom:''})}
